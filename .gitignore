@@ -1,0 +1,31 @@
+# 编译产物
+bin/
+obj/
+publish/
+installer-output/
+*.user
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.suo
+
+# 测试覆盖率
+coverage/
+TestResults/
+*.coverage
+
+# 签名私钥与证书（阶段五安全要求：绝不能进版本库）
+*.pfx
+*.p12
+*.snk
+certs/
+
+# 本机日志（日志含排障信息，不入库）
+*.log
+
+# 临时验证脚手架（非产品代码）
+.verify/
+.imgprobe/
+.workbuddy/
+installer-output2/

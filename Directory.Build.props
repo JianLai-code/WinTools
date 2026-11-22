@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+    全解决方案共享的构建配置。
+    作用：让所有 WinTools.Tools.* 工具项目编译后，DLL 自动复制到 Shell 的输出目录，
+    这样 ToolDiscovery 在运行时能扫描到它们。这是"插件式发现"能工作的关键一环。
+  -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <Target Name="CopyToolToShellOutput" AfterTargets="Build"
+          Condition="$(MSBuildProjectName.StartsWith('WinTools.Tools.')) and !$(MSBuildProjectName.EndsWith('.Tests'))">
+    <MakeDir Directories="$(MSBuildThisFileDirectory)src\WinTools.Shell\bin\$(Configuration)\$(TargetFramework)\" />
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(MSBuildThisFileDirectory)src\WinTools.Shell\bin\$(Configuration)\$(TargetFramework)\"
+          SkipUnchangedFiles="true"
+          Condition="Exists('$(TargetPath)')" />
+  </Target>
+
+</Project>

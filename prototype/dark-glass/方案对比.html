@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="a" data-screen="home">
+<head>
+<meta charset="utf-8">
+<title>WinTools 界面方案 · 深色玻璃拟态</title>
+<style>
+/* ============ 基础 ============ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --win-w: 1280px; --win-h: 800px;
+  --rail: 210px; --title-h: 38px;
+  --font: "Segoe UI Variable Text","Segoe UI","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+}
+html,body { height: 100%; }
+body {
+  font-family: var(--font);
+  background: #05070C;
+  color: #E6EDF7;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-font-smoothing: antialiased;
+}
+.stage { position: relative; display: flex; flex-direction: column; gap: 12px; }
+
+/* ============ 三套基调 ============ */
+/* A 深海蓝：克制的 Win11 深色 + 蓝青玻璃 */
+html[data-theme="a"] {
+  --bg-a:#0A1424; --bg-b:#060A13; --bg-c:#0E1B2E;
+  --glass:rgba(148,183,232,.075);
+  --glass-strong:rgba(148,183,232,.12);
+  --hair:rgba(180,205,235,.14);
+  --hair-soft:rgba(180,205,235,.08);
+  --hi:rgba(255,255,255,.10);
+  --acc:#4C9AFF; --acc-2:#38BDF8; --acc-ink:#0A1424;
+  --acc-soft:rgba(76,154,255,.16);
+  --glow:rgba(56,189,248,.30);
+  --txt:#E8EFF9; --txt-2:#A9B8CC; --txt-3:#7286A0;
+  --r-win:12px; --r-card:10px; --r-ctl:8px;
+  --blur:22px; --sat:130%;
+  --ok:#34D399; --warn:#FBBF24; --err:#FB7185;
+}
+/* B 曜石紫：高饱和极光 + 大圆角厚玻璃 */
+html[data-theme="b"] {
+  --bg-a:#160C26; --bg-b:#07050C; --bg-c:#1E1030;
+  --glass:rgba(190,170,255,.085);
+  --glass-strong:rgba(190,170,255,.14);
+  --hair:rgba(206,190,255,.18);
+  --hair-soft:rgba(206,190,255,.09);
+  --hi:rgba(255,255,255,.14);
+  --acc:#A78BFA; --acc-2:#F472B6; --acc-ink:#150A24;
+  --acc-soft:rgba(167,139,250,.20);
+  --glow:rgba(244,114,182,.34);
+  --txt:#F1ECFB; --txt-2:#BDB2D6; --txt-3:#867A9E;
+  --r-win:20px; --r-card:18px; --r-ctl:12px;
+  --blur:34px; --sat:150%;
+  --ok:#5EEAD4; --warn:#FCD34D; --err:#FDA4AF;
+}
+/* C 墨玉青：低饱和、细描边、高密度，偏专业工具 */
+html[data-theme="c"] {
+  --bg-a:#0C1613; --bg-b:#060B09; --bg-c:#111E19;
+  --glass:rgba(150,220,200,.055);
+  --glass-strong:rgba(150,220,200,.09);
+  --hair:rgba(170,225,205,.13);
+  --hair-soft:rgba(170,225,205,.07);
+  --hi:rgba(255,255,255,.07);
+  --acc:#2DD4BF; --acc-2:#7DD3C0; --acc-ink:#08120F;
+  --acc-soft:rgba(45,212,191,.13);
+  --glow:rgba(45,212,191,.22);
+  --txt:#E4F0EC; --txt-2:#9DB3AC; --txt-3:#6A807A;
+  --r-win:10px; --r-card:8px; --r-ctl:6px;
+  --blur:14px; --sat:115%;
+  --ok:#4ADE80; --warn:#FACC15; --err:#F87171;
+}
+
+/* ============ 窗口 ============ */
+.window {
+  width: var(--win-w); height: var(--win-h);
+  border-radius: var(--r-win);
+  overflow: hidden; position: relative;
+  border: 1px solid var(--hair);
+  box-shadow: 0 40px 100px rgba(0,0,0,.65), 0 0 0 1px rgba(0,0,0,.4);
+  background:
+    radial-gradient(1200px 620px at 78% -12%, var(--bg-c) 0%, transparent 62%),
+    radial-gradient(900px 520px at 8% 108%, var(--bg-a) 0%, transparent 60%),
+    linear-gradient(160deg, var(--bg-a) 0%, var(--bg-b) 48%, var(--bg-b) 100%);
+  display: flex; flex-direction: column;
+}
+/* 背景光晕 + 细网格，让模糊有东西可糊 */
+.window::before {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(420px 300px at 22% 18%, var(--glow) 0%, transparent 70%),
+    radial-gradient(520px 340px at 88% 82%, var(--acc-soft) 0%, transparent 72%);
+  filter: blur(6px); opacity:.85;
+}
+html[data-theme="a"] .window::after,
+html[data-theme="c"] .window::after {
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.30;
+  background-image:
+    linear-gradient(to right, var(--hair-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--hair-soft) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(760px 480px at 62% 22%, #000 0%, transparent 78%);
+}
+html[data-theme="b"] .window::after {
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background:
+    radial-gradient(300px 220px at 40% 0%, rgba(167,139,250,.35), transparent 70%),
+    radial-gradient(340px 240px at 66% 100%, rgba(244,114,182,.22), transparent 70%);
+  filter: blur(30px);
+}
+.window > * { position: relative; z-index: 1; }
+
+/* ============ 标题栏 ============ */
+.titlebar {
+  height: var(--title-h); flex: 0 0 auto;
+  display: grid; grid-template-columns: var(--rail) 1fr auto; align-items: center;
+  background: var(--glass);
+  backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  border-bottom: 1px solid var(--hair-soft);
+  box-shadow: 0 1px 0 var(--hi) inset;
+}
+.brand { display:flex; align-items:center; gap:9px; padding-left:14px; height:100%;
+  border-right:1px solid var(--hair-soft); }
+.brand .mark { width:22px; height:22px; border-radius:7px; display:grid; place-items:center;
+  background: linear-gradient(140deg, var(--acc), var(--acc-2)); color: var(--acc-ink);
+  box-shadow: 0 0 14px var(--glow); }
+.brand .mark svg { width:14px; height:14px; }
+.brand .nm { font-size:13px; font-weight:650; letter-spacing:.2px; }
+.brand .vr { font-size:10px; color:var(--txt-3); margin-top:1px; }
+.searchwrap { display:flex; justify-content:center; padding:0 16px; }
+.search { width:420px; height:26px; display:flex; align-items:center; gap:8px; padding:0 10px;
+  border-radius:999px; background:var(--glass); border:1px solid var(--hair-soft);
+  color:var(--txt-3); font-size:12px; }
+.search svg { width:13px; height:13px; flex:0 0 auto; }
+.search kbd { margin-left:auto; font:600 10px var(--font); color:var(--txt-2);
+  background:var(--glass-strong); border:1px solid var(--hair-soft); border-radius:4px; padding:1px 5px; }
+.chrome { display:flex; align-items:center; height:100%; padding-right:6px; }
+.cbtn { width:38px; height:26px; display:grid; place-items:center; border-radius:var(--r-ctl);
+  color:var(--txt-2); }
+.cbtn svg { width:14px; height:14px; }
+.cbtn.hot { background:var(--glass-strong); color:var(--txt); }
+.cbtn.close:hover { background:var(--err); color:#20060A; }
+
+/* ============ 主体 ============ */
+.main { flex:1; display:grid; grid-template-columns: var(--rail) 1fr; min-height:0; }
+.rail { padding:12px 10px; display:flex; flex-direction:column; gap:2px;
+  background: var(--glass); backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+  border-right:1px solid var(--hair-soft); }
+.rail .grp { font-size:10.5px; color:var(--txt-3); letter-spacing:.14em; padding:12px 8px 6px; }
+.nav { height:32px; display:flex; align-items:center; gap:9px; padding:0 9px;
+  border-radius:var(--r-ctl); color:var(--txt-2); font-size:12.5px; position:relative; }
+.nav svg { width:15px; height:15px; flex:0 0 auto; opacity:.9; }
+.nav .cnt { margin-left:auto; font-size:10.5px; color:var(--txt-3);
+  background:var(--glass-strong); border-radius:999px; padding:1px 7px; }
+.nav.on { color:var(--txt); font-weight:600; background:var(--acc-soft);
+  border:1px solid color-mix(in srgb, var(--acc) 34%, transparent); }
+.nav.on::before { content:""; position:absolute; left:-10px; top:8px; bottom:8px; width:3px;
+  border-radius:0 3px 3px 0; background:linear-gradient(var(--acc),var(--acc-2)); box-shadow:0 0 10px var(--glow); }
+.nav.on .cnt { color:var(--acc); background:transparent; }
+.rail .spacer { flex:1; }
+.tray { border:1px solid var(--hair-soft); border-radius:var(--r-card); padding:9px 10px;
+  background:var(--glass); }
+.tray .t1 { font-size:12px; font-weight:600; display:flex; align-items:center; gap:7px; }
+.tray .t1 svg { width:13px; height:13px; color:var(--acc); }
+.tray .t2 { font-size:10.5px; color:var(--txt-3); margin-top:3px; }
+
+/* ============ 内容区 ============ */
+.content { overflow:auto; padding:20px 24px 26px; }
+.content::-webkit-scrollbar { width:9px; }
+.content::-webkit-scrollbar-thumb { background:var(--glass-strong); border-radius:9px;
+  border:3px solid transparent; background-clip:padding-box; }
+.pagehead { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.pagehead h1 { font-size:23px; font-weight:700; letter-spacing:-.2px; }
+.pagehead .sub { font-size:12px; color:var(--txt-3); margin-top:5px; }
+.headacts { display:flex; gap:8px; }
+
+/* 按钮 */
+.btn { height:30px; padding:0 13px; display:inline-flex; align-items:center; gap:7px;
+  border-radius:var(--r-ctl); font-size:12.5px; border:1px solid var(--hair);
+  background:var(--glass-strong); color:var(--txt); box-shadow:0 1px 0 var(--hi) inset; }
+.btn svg { width:14px; height:14px; }
+.btn.pri { background:linear-gradient(140deg,var(--acc),var(--acc-2)); color:var(--acc-ink);
+  border-color:transparent; font-weight:650; box-shadow:0 6px 18px -6px var(--glow), 0 1px 0 rgba(255,255,255,.25) inset; }
+.btn.gho { background:transparent; border-color:var(--hair-soft); color:var(--txt-2); }
+
+/* 分区标题 */
+.sec { display:flex; align-items:center; gap:9px; margin:18px 0 9px; }
+.sec h2 { font-size:13.5px; font-weight:650; }
+.sec .n { font-size:11px; color:var(--txt-3); }
+.sec .more { margin-left:auto; font-size:11.5px; color:var(--acc); display:flex; align-items:center; gap:3px; }
+.sec .more svg { width:12px; height:12px; }
+
+/* 卡片通用玻璃面 */
+.glass { background:var(--glass); backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  border:1px solid var(--hair-soft); border-radius:var(--r-card);
+  box-shadow:0 1px 0 var(--hi) inset, 0 12px 28px -18px rgba(0,0,0,.7); }
+
+/* 快速入口条 */
+.quick { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.q { height:52px; display:flex; align-items:center; gap:10px; padding:0 11px;
+  border-radius:var(--r-card); background:var(--glass); border:1px solid var(--hair-soft);
+  box-shadow:0 1px 0 var(--hi) inset; }
+.q .ic { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; flex:0 0 auto;
+  background:color-mix(in srgb, var(--c) 22%, transparent);
+  border:1px solid color-mix(in srgb, var(--c) 40%, transparent); color:var(--c); }
+.q .ic svg { width:15px; height:15px; }
+.q .nm { font-size:12.5px; font-weight:600; }
+.q .sc { margin-left:auto; font:600 10px var(--font); color:var(--txt-3); }
+.q:hover { background:var(--glass-strong); border-color:var(--hair); }
+
+/* 工具卡 */
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.card { padding:13px 14px; display:flex; flex-direction:column; gap:9px; min-height:104px;
+  position:relative; overflow:hidden; }
+.card::after { content:""; position:absolute; inset:0; opacity:0;
+  background:radial-gradient(240px 90px at 20% 0%, var(--acc-soft), transparent 70%); }
+.card:hover::after { opacity:1; }
+.card .top { display:flex; align-items:center; gap:10px; }
+.card .ic { width:32px; height:32px; border-radius:9px; display:grid; place-items:center;
+  background:linear-gradient(150deg, color-mix(in srgb, var(--c) 34%, transparent), color-mix(in srgb, var(--c) 14%, transparent));
+  border:1px solid color-mix(in srgb, var(--c) 46%, transparent); color:var(--c);
+  box-shadow:0 0 16px -6px color-mix(in srgb, var(--c) 70%, transparent); }
+.card .ic svg { width:17px; height:17px; }
+.card .nm { font-size:13.5px; font-weight:650; }
+.card .fav { margin-left:auto; color:var(--warn); opacity:.95; }
+.card .fav svg { width:14px; height:14px; }
+.card .desc { font-size:11.5px; line-height:1.55; color:var(--txt-3); }
+.card .foot { margin-top:auto; display:flex; align-items:center; gap:6px; }
+.chip { font:600 10px var(--font); color:var(--txt-2); background:var(--glass-strong);
+  border:1px solid var(--hair-soft); border-radius:999px; padding:2px 8px; }
+.card .go { margin-left:auto; font-size:11.5px; color:var(--acc); opacity:0; }
+.card:hover .go { opacity:1; }
+
+/* ============ 工具页 ============ */
+.crumb { display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--txt-3); margin-bottom:9px; }
+.crumb b { color:var(--txt-2); font-weight:600; }
+.crumb svg { width:12px; height:12px; }
+.toolhead { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.toolhead .l { display:flex; gap:12px; align-items:center; }
+.toolhead .big { width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(150deg, color-mix(in srgb, var(--c) 36%, transparent), color-mix(in srgb, var(--c) 12%, transparent));
+  border:1px solid color-mix(in srgb, var(--c) 48%, transparent); color:var(--c);
+  box-shadow:0 0 22px -8px color-mix(in srgb, var(--c) 80%, transparent); }
+.toolhead .big svg { width:22px; height:22px; }
+.toolhead h1 { font-size:20px; font-weight:700; }
+.toolhead .sub { font-size:12px; color:var(--txt-3); margin-top:4px; }
+.seg { display:flex; gap:6px; padding:4px; border-radius:var(--r-ctl);
+  background:var(--glass); border:1px solid var(--hair-soft); }
+.seg span { height:26px; padding:0 13px; display:inline-flex; align-items:center; border-radius:calc(var(--r-ctl) - 2px);
+  font-size:12px; color:var(--txt-2); }
+.seg span.on { background:linear-gradient(140deg,var(--acc),var(--acc-2)); color:var(--acc-ink); font-weight:650;
+  box-shadow:0 4px 14px -6px var(--glow); }
+.panel { padding:12px 13px; margin-bottom:10px; }
+.panel .ph { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.panel .ph .t { font-size:12px; font-weight:650; color:var(--txt-2); letter-spacing:.02em; }
+.panel .ph .ln { flex:1; height:1px; background:var(--hair-soft); }
+.ta { height:132px; border-radius:var(--r-ctl); background:rgba(0,0,0,.26);
+  border:1px solid var(--hair-soft); padding:10px 11px; font:12.5px/1.65 "Cascadia Mono",Consolas,monospace;
+  color:var(--txt); white-space:pre; overflow:hidden; }
+.ta.ro { color:var(--acc-2); }
+.ta .dim { color:var(--txt-3); }
+.rowacts { display:flex; gap:7px; margin-top:9px; }
+.fb { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ok);
+  background:color-mix(in srgb, var(--ok) 12%, transparent);
+  border:1px solid color-mix(in srgb, var(--ok) 26%, transparent);
+  border-radius:var(--r-ctl); padding:7px 10px; margin-top:9px; }
+.fb svg { width:13px; height:13px; }
+
+/* 方案标签 */
+.tag { font-size:12px; color:#8FA3BC; padding-left:2px; }
+.tag b { color:#C7D6EA; font-weight:650; }
+
+html[data-screen="home"] [data-only="tool"] { display:none; }
+html[data-screen="tool"] [data-only="home"] { display:none; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-apps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7L7.4 19l1-5.6-4-3.9 5.6-.8z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3.2 2"/></symbol>
+<symbol id="i-chip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v3M14 3v3M10 18v3M14 18v3M3 10h3M3 14h3M18 10h3M18 14h3"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A2 2 0 0 1 5 5.5h3.6l1.8 2H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 6h14M5 12h10M5 18h7"/></symbol>
+<symbol id="i-network" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3.4 9.5h17.2M3.4 14.5h17.2M12 3c2.6 3 2.6 15 0 18M12 3c-2.6 3-2.6 15 0 18"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7.5 4 12l5 4.5M15 7.5 20 12l-5 4.5"/></symbol>
+<symbol id="i-fingerprint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 20c-2.4-1.6-3.6-4.2-3.6-7.2A3.6 3.6 0 0 1 12 9.2a3.6 3.6 0 0 1 3.6 3.6c0 1.3-.2 2.5-.6 3.6"/><path d="M8.4 4.6A7.6 7.6 0 0 1 19.6 12c0 2-.4 3.9-1.2 5.5"/><path d="M5.6 7.4A7.6 7.6 0 0 0 4.4 12c0 2.6.8 4.9 2.2 6.6"/><path d="M12 12.6v2.2c0 1.2-.2 2.4-.6 3.4"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.6 3.4 20.6 12.4a2 2 0 0 1 0 2.8l-5.4 5.4a2 2 0 0 1-2.8 0L3.4 11.6V4a.6.6 0 0 1 .6-.6z"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-base64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13l-3-3M20 15H7l3 3"/></symbol>
+<symbol id="i-json" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5C6.5 5 7.5 10 5 12c2.5 2 1.5 7 4 7M15 5c2.5 0 1.5 5 4 7-2.5 2-1.5 7-4 7"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="4.5"/><path d="M11.8 11.8 20 20M16.5 16.5l2-2M14 14l2-2"/></symbol>
+<symbol id="i-port" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="8" width="18" height="9" rx="2.5"/><path d="M7 12h2M12 12h2M17 12h1.5M7 15h.01"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6zM18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></symbol>
+<symbol id="i-panel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></symbol>
+<symbol id="i-min" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14"/></symbol>
+<symbol id="i-max" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 4v16M7 20l-3-3M7 4l3 3M14 8h6M14 13h4M14 18h2"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 5.5A1.5 1.5 0 0 0 13.5 4H6a2 2 0 0 0-2 2v7.5A1.5 1.5 0 0 0 5.5 15"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3M17 17H6l3 3"/></symbol>
+<symbol id="i-eraser" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 19h11M4.5 15.5 12 8l5 5-5.5 5.5H8z"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v7M8 10h8l-1.5 4H16l-4 6-4-6h1.5L8 10z"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.2M12 18.8V21M4.2 7.5l1.9 1.1M17.9 15.4l1.9 1.1M4.2 16.5l1.9-1.1M17.9 8.6l1.9-1.1"/></symbol>
+</defs></svg>
+
+<div class="stage">
+<div class="window">
+
+  <!-- 标题栏 -->
+  <div class="titlebar">
+    <div class="brand">
+      <div class="mark"><svg><use href="#i-apps"/></svg></div>
+      <div><div class="nm">ToolBox</div><div class="vr">v0.1.2</div></div>
+    </div>
+    <div class="searchwrap">
+      <div class="search"><svg><use href="#i-search"/></svg><span>搜索工具或功能</span><kbd>Ctrl K</kbd></div>
+    </div>
+    <div class="chrome">
+      <div class="cbtn"><svg><use href="#i-sun"/></svg></div>
+      <div class="cbtn"><svg><use href="#i-panel"/></svg></div>
+      <div class="cbtn"><svg><use href="#i-min"/></svg></div>
+      <div class="cbtn"><svg><use href="#i-max"/></svg></div>
+      <div class="cbtn close"><svg><use href="#i-x"/></svg></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- 侧栏 -->
+    <aside class="rail">
+      <div class="grp">浏览</div>
+      <div class="nav on"><svg><use href="#i-apps"/></svg>全部工具<span class="cnt">8</span></div>
+      <div class="nav"><svg><use href="#i-star"/></svg>我的收藏<span class="cnt">6</span></div>
+      <div class="nav"><svg><use href="#i-clock"/></svg>最近使用</div>
+      <div class="grp">分类</div>
+      <div class="nav"><svg><use href="#i-chip"/></svg>系统维护<span class="cnt">1</span></div>
+      <div class="nav"><svg><use href="#i-folder"/></svg>文件处理<span class="cnt">2</span></div>
+      <div class="nav"><svg><use href="#i-text"/></svg>文本编码<span class="cnt">3</span></div>
+      <div class="nav"><svg><use href="#i-port"/></svg>网络工具<span class="cnt">1</span></div>
+      <div class="nav"><svg><use href="#i-code"/></svg>开发辅助<span class="cnt">1</span></div>
+      <div class="spacer"></div>
+      <div class="nav"><svg><use href="#i-gear"/></svg>设置</div>
+      <div class="tray" style="margin-top:8px">
+        <div class="t1"><svg><use href="#i-pin"/></svg>常驻托盘</div>
+        <div class="t2">关窗后台待命 · Ctrl Shift T</div>
+      </div>
+    </aside>
+
+    <!-- 内容 -->
+    <div class="content">
+
+      <!-- ===== 首页 ===== -->
+      <div data-only="home">
+        <div class="pagehead">
+          <div><h1>全部工具</h1><div class="sub">本地运行，无需联网 · 共 8 个工具</div></div>
+          <div class="headacts">
+            <div class="btn"><svg><use href="#i-sort"/></svg>排序</div>
+            <div class="btn pri"><svg><use href="#i-plus"/></svg>添加工具</div>
+          </div>
+        </div>
+
+        <div class="sec"><h2>快速入口</h2><span class="n">6 个常用</span></div>
+        <div class="quick">
+          <div class="q" style="--c:#22D3EE"><div class="ic"><svg><use href="#i-fingerprint"/></svg></div><div class="nm">哈希校验</div><span class="sc">Ctrl 4</span></div>
+          <div class="q" style="--c:#F59E0B"><div class="ic"><svg><use href="#i-tag"/></svg></div><div class="nm">批量重命名</div><span class="sc">Ctrl 5</span></div>
+          <div class="q" style="--c:#60A5FA"><div class="ic"><svg><use href="#i-base64"/></svg></div><div class="nm">Base64 编解码</div><span class="sc">Ctrl 2</span></div>
+          <div class="q" style="--c:#A78BFA"><div class="ic"><svg><use href="#i-json"/></svg></div><div class="nm">JSON 格式化</div><span class="sc">Ctrl 1</span></div>
+          <div class="q" style="--c:#F472B6"><div class="ic"><svg><use href="#i-key"/></svg></div><div class="nm">随机密码生成</div><span class="sc">Ctrl 3</span></div>
+          <div class="q" style="--c:#34D399"><div class="ic"><svg><use href="#i-port"/></svg></div><div class="nm">端口占用查询</div><span class="sc">Ctrl 6</span></div>
+        </div>
+
+        <div class="sec"><h2>文本编码</h2><span class="n">3 个工具</span><span class="more">查看全部<svg><use href="#i-chev"/></svg></span></div>
+        <div class="grid">
+          <div class="card glass" style="--c:#A78BFA">
+            <div class="top"><div class="ic"><svg><use href="#i-json"/></svg></div><div class="nm">JSON 格式化</div><div class="fav"><svg><use href="#i-star"/></svg></div></div>
+            <div class="desc">美化 / 压缩 / 校验 JSON，定位语法错误并高亮行列。</div>
+            <div class="foot"><span class="chip">Ctrl 1</span><span class="go">打开 →</span></div>
+          </div>
+          <div class="card glass" style="--c:#60A5FA">
+            <div class="top"><div class="ic"><svg><use href="#i-base64"/></svg></div><div class="nm">Base64 编解码</div><div class="fav"><svg><use href="#i-star"/></svg></div></div>
+            <div class="desc">文本与 Base64 双向转换，UTF-8 往返中文不乱码。</div>
+            <div class="foot"><span class="chip">Ctrl 2</span><span class="go">打开 →</span></div>
+          </div>
+          <div class="card glass" style="--c:#F472B6">
+            <div class="top"><div class="ic"><svg><use href="#i-key"/></svg></div><div class="nm">随机密码生成</div><div class="fav"><svg><use href="#i-star"/></svg></div></div>
+            <div class="desc">密码学安全随机串，长度与字符集实时强度评估。</div>
+            <div class="foot"><span class="chip">Ctrl 3</span><span class="go">打开 →</span></div>
+          </div>
+        </div>
+
+        <div class="sec"><h2>文件处理</h2><span class="n">2 个工具</span><span class="more">查看全部<svg><use href="#i-chev"/></svg></span></div>
+        <div class="grid">
+          <div class="card glass" style="--c:#22D3EE">
+            <div class="top"><div class="ic"><svg><use href="#i-fingerprint"/></svg></div><div class="nm">哈希校验</div><div class="fav"><svg><use href="#i-star"/></svg></div></div>
+            <div class="desc">一次算出 MD5 / SHA1 / SHA256，支持拖放文件。</div>
+            <div class="foot"><span class="chip">Ctrl 4</span><span class="go">打开 →</span></div>
+          </div>
+          <div class="card glass" style="--c:#F59E0B">
+            <div class="top"><div class="ic"><svg><use href="#i-tag"/></svg></div><div class="nm">批量重命名</div><div class="fav"><svg><use href="#i-star"/></svg></div></div>
+            <div class="desc">按序号或查找替换改名，先预览再执行，可撤销。</div>
+            <div class="foot"><span class="chip">Ctrl 5</span><span class="go">打开 →</span></div>
+          </div>
+        </div>
+
+        <div class="sec"><h2>系统维护 · 网络工具 · 开发辅助</h2><span class="n">3 个工具</span></div>
+        <div class="grid">
+          <div class="card glass" style="--c:#818CF8">
+            <div class="top"><div class="ic"><svg><use href="#i-chip"/></svg></div><div class="nm">系统信息总览</div></div>
+            <div class="desc">CPU / 内存 / 磁盘 / 系统版本一屏看全。</div>
+            <div class="foot"><span class="chip">系统维护</span><span class="go">打开 →</span></div>
+          </div>
+          <div class="card glass" style="--c:#34D399">
+            <div class="top"><div class="ic"><svg><use href="#i-port"/></svg></div><div class="nm">端口占用查询</div><div class="fav"><svg><use href="#i-star"/></svg></div></div>
+            <div class="desc">查端口占用与进程 PID，一键定位来源。</div>
+            <div class="foot"><span class="chip">Ctrl 6</span><span class="go">打开 →</span></div>
+          </div>
+          <div class="card glass" style="--c:#38BDF8">
+            <div class="top"><div class="ic"><svg><use href="#i-sparkle"/></svg></div><div class="nm">示例工具</div></div>
+            <div class="desc">插件发现机制的示例，接入新工具时参考。</div>
+            <div class="foot"><span class="chip">开发辅助</span><span class="go">打开 →</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 工具页 ===== -->
+      <div data-only="tool">
+        <div class="crumb"><b>文本编码</b><svg><use href="#i-chev"/></svg><span>Base64 编解码</span></div>
+        <div class="toolhead">
+          <div class="l">
+            <div class="big" style="--c:#60A5FA"><svg><use href="#i-base64"/></svg></div>
+            <div><h1>Base64 编解码</h1><div class="sub">文本与 Base64 双向转换，中文往返不乱码。</div></div>
+          </div>
+          <div class="seg"><span class="on">文本 → Base64</span><span>Base64 → 文本</span></div>
+        </div>
+
+        <div class="panel glass">
+          <div class="ph"><span class="t">输入</span><span class="ln"></span><span class="n" style="font-size:11px;color:var(--txt-3)">32 字符</span></div>
+          <div class="ta">WinTools 工具箱 · 中文往返测试</div>
+          <div class="rowacts">
+            <div class="btn pri">转换</div>
+            <div class="btn"><svg><use href="#i-swap"/></svg>交换</div>
+            <div class="btn gho"><svg><use href="#i-eraser"/></svg>清空</div>
+          </div>
+        </div>
+
+        <div class="panel glass">
+          <div class="ph"><span class="t">结果</span><span class="ln"></span>
+            <div class="btn" style="height:24px;font-size:11.5px"><svg><use href="#i-copy"/></svg>复制</div>
+          </div>
+          <div class="ta ro">V2luVG9vbHMg5bel5YW355u477y...<span class="dim">（已换行显示，共 96 字符）</span></div>
+          <div class="fb"><svg><use href="#i-check"/></svg>已复制到剪贴板。</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+  <div class="tag">方案 <b data-label>A · 深海蓝</b></div>
+</div>
+
+<script>
+const p = new URLSearchParams(location.search);
+const t = (p.get('theme') || 'a').toLowerCase();
+const s = p.get('screen') || 'home';
+document.documentElement.dataset.theme = t;
+document.documentElement.dataset.screen = s;
+const names = { a:'A · 深海蓝（克制 Win11 深色）', b:'B · 曜石紫（厚玻璃极光）', c:'C · 墨玉青（细描边高密度）' };
+document.querySelector('[data-label]').textContent = names[t] + (s === 'tool' ? ' · 工具页' : ' · 首页');
+</script>
+</body>
+</html>

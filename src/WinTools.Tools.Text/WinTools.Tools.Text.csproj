@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WinTools.Core\WinTools.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 二维码生成的纯托管编码器，本地计算无网络；已在离线 NuGet 缓存中 -->
+    <PackageReference Include="QRCoder" Version="1.4.3" />
+  </ItemGroup>
+
+  <!-- 项目名以 "WinTools.Tools." 开头，产物 DLL 会被 Directory.Build.props 自动复制到 Shell 目录 -->
+
+</Project>

@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- 高 DPI 策略：进程声明 PerMonitorV2，窗口按物理分辨率原生绘制（文字与描边锐利，
+         不再被 DWM 整窗位图拉伸）。界面尺寸仍按 96 DPI 设计值书写，由 UiTheme.SetScaleFromDpi
+         在构造界面前把系统 DPI 折算成倍数统一放大，125%/150%/200% 屏上保持同一套比例。 -->
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon />
+
+    <!-- 版本资源（阶段八 4.4）：exe 属性页可见；与 WinTools.iss / CHANGELOG.md 保持一致 -->
+    <Version>0.5.7</Version>
+    <AssemblyVersion>0.5.7.0</AssemblyVersion>
+    <FileVersion>0.5.7.0</FileVersion>
+    <Product>WinTools 轻量级工具箱</Product>
+    <Company>WinTools</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WinTools.Core\WinTools.Core.csproj" />
+    <ProjectReference Include="..\WinTools.Services\WinTools.Services.csproj" />
+    <!-- 工具 DLL 的运行时依赖（端口详情读取用 WMI）。工具项目不被 Shell 直接引用，
+         这里显式带上，确保 Debug 输出与 publish 目录都有 System.Management.dll。 -->
+    <PackageReference Include="System.Management" Version="11.0.0" />
+    <!-- 二维码工具 DLL 的运行时依赖（PngByteQRCode）。工具项目不被 Shell 直接引用，
+         这里显式带上，确保 Debug 输出与 publish 目录都有 QRCoder.dll。 -->
+    <PackageReference Include="QRCoder" Version="1.4.3" />
+  </ItemGroup>
+
+  <!--
+    注意：这里【故意不】引用任何 WinTools.Tools.* 项目。
+    工具在运行时由 ToolDiscovery 按 "WinTools.Tools.*.dll" 扫描发现，
+    因此新增工具时 Shell 源码零改动。详见 docs/阶段三。
+  -->
+
+  <!-- 自包含发布（-r win-x64）输出目录带 RID，Directory.Build.props 复制的工具 DLL
+       落在无 RID 目录，publish 不会带走它们 → 插件发现失效。此目标在发布后补拷。 -->
+  <Target Name="CopyToolsToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <ToolDlls Include="..\WinTools.Tools.*\bin\$(Configuration)\$(TargetFramework)\WinTools.Tools.*.dll"
+                Exclude="..\WinTools.Tools.*\bin\**\*.Tests.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ToolDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="已复制工具插件 DLL 到发布目录: @(ToolDlls->'%(Filename)')" />
+  </Target>
+
+</Project>

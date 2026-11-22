@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\WinTools.Tools.Text\WinTools.Tools.Text.csproj" />
+    <ProjectReference Include="..\..\src\WinTools.Tools.File\WinTools.Tools.File.csproj" />
+    <ProjectReference Include="..\..\src\WinTools.Tools.System\WinTools.Tools.System.csproj" />
+  </ItemGroup>
+
+  <!-- 安全审查测试要读取实现源码，确认用的是 RandomNumberGenerator 而非 Random -->
+  <ItemGroup>
+    <Content Include="..\..\src\WinTools.Tools.Text\PasswordGenerator.cs"
+             Link="PasswordGenerator.cs"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

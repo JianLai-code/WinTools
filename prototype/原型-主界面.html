@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinTools 界面原型</title>
+<style>
+  :root{
+    --primary:#185FA5; --primary-hover:#0C447C;
+    --success:#0F6E56; --success-bg:#E1F5EE;
+    --warn:#BA7517; --warn-bg:#FAEEDA;
+    --error:#A32D2D; --error-bg:#FCEBEB;
+    --bg:#F5F6F8; --panel:#FFFFFF; --border:#D8DCE3;
+    --text:#1F2430; --muted:#6B7280; --hover:#EEF3FA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"微软雅黑","Microsoft YaHei","Segoe UI",sans-serif;font-size:13px;color:var(--text);background:#E8EAEE;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+  .window{width:1000px;height:680px;min-width:860px;background:var(--bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;}
+  .titlebar{height:44px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:14px;flex-shrink:0;}
+  .logo{font-weight:600;font-size:15px;color:var(--primary);display:flex;align-items:center;gap:8px;}
+  .logo .mark{width:22px;height:22px;background:var(--primary);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;}
+  .search{margin-left:auto;position:relative;}
+  .search input{width:220px;height:30px;border:1px solid var(--border);border-radius:5px;padding:0 12px 0 32px;font-size:12px;outline:none;background:#FAFBFC;}
+  .search input:focus{border-color:var(--primary);background:#fff;}
+  .search::before{content:"⌕";position:absolute;left:10px;top:4px;color:var(--muted);font-size:18px;}
+  .winbtns{display:flex;gap:2px;}
+  .winbtns span{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:5px;color:var(--muted);cursor:default;}
+  .winbtns span:hover{background:var(--hover);}
+  .main{flex:1;display:flex;min-height:0;}
+  .sidebar{width:200px;background:var(--panel);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;flex-shrink:0;}
+  .nav-group{margin-bottom:6px;}
+  .nav-group-title{padding:8px 20px;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
+  .nav-item{padding:9px 20px 9px 32px;cursor:pointer;display:flex;align-items:center;gap:9px;color:#374151;border-left:3px solid transparent;}
+  .nav-item:hover{background:var(--hover);}
+  .nav-item.active{background:#EAF2FB;border-left-color:var(--primary);color:var(--primary);font-weight:600;}
+  .nav-item .dot{width:6px;height:6px;border-radius:50%;background:#C3CAD4;flex-shrink:0;}
+  .nav-item.active .dot{background:var(--primary);}
+  .content{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .breadcrumb{height:38px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;color:var(--muted);font-size:12px;flex-shrink:0;gap:8px;}
+  .breadcrumb b{color:var(--text);font-weight:600;}
+  .workspace{flex:1;overflow-y:auto;padding:24px 28px;}
+  .tool-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+  .tool-desc{color:var(--muted);font-size:12px;margin-bottom:22px;line-height:1.6;}
+  .dropzone{border:2px dashed #B9C6D8;border-radius:8px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#FBFCFE;color:var(--muted);cursor:pointer;transition:.15s;}
+  .dropzone:hover{border-color:var(--primary);background:#F3F8FE;}
+  .dropzone .icon{width:44px;height:44px;border-radius:50%;background:#EAF2FB;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--primary);}
+  .dropzone .hint{font-size:12px;}
+  .dropzone .hint b{color:var(--primary);}
+  .btn{height:34px;padding:0 18px;border-radius:5px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:12px;cursor:pointer;font-family:inherit;transition:.12s;}
+  .btn:hover{background:var(--hover);}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .btn.primary:hover{background:var(--primary-hover);}
+  .btn.danger{background:var(--error);border-color:var(--error);color:#fff;}
+  .btn.danger:hover{background:#7C2020;}
+  .row{display:flex;align-items:center;gap:10px;}
+  .mt{margin-top:16px;}
+  label.field{display:block;font-size:12px;color:#374151;margin-bottom:6px;font-weight:600;}
+  .input,select{height:34px;width:100%;max-width:360px;border:1px solid var(--border);border-radius:5px;padding:0 12px;font-size:12px;outline:none;font-family:inherit;background:#fff;}
+  .input:focus{border-color:var(--primary);}
+  .input-error{border-color:var(--error)!important;}
+  .field-error{color:var(--error);font-size:11px;margin-top:5px;}
+  .result-box{margin-top:20px;border:1px solid var(--border);border-radius:8px;background:#fff;overflow:hidden;}
+  .result-head{height:38px;background:#F8F9FB;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;}
+  .result-head .copy{margin-left:auto;height:26px;padding:0 12px;font-size:11px;}
+  .result-body{padding:14px;font-family:Consolas,"Courier New",monospace;font-size:12px;line-height:2;color:#374151;}
+  .result-body .k{color:var(--muted);display:inline-block;width:64px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid #EDF0F4;}
+  th{background:#F8F9FB;color:var(--muted);font-weight:600;}
+  td.mono{font-family:Consolas,monospace;}
+  .statusbar{height:30px;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 20px;font-size:11px;gap:8px;flex-shrink:0;color:var(--muted);}
+  .statusbar .badge{display:flex;align-items:center;gap:6px;}
+  .statusbar .badge.ok{color:var(--success);}
+  .statusbar .badge.err{color:var(--error);}
+  .statusbar .badge.info{color:var(--primary);}
+  .statusbar .ico{font-size:12px;}
+  .progress{height:6px;background:#EDF0F4;border-radius:4px;overflow:hidden;margin-top:14px;max-width:360px;display:none;}
+  .progress > i{display:block;height:100%;width:0;background:var(--primary);transition:width .2s;}
+  .alert{padding:10px 14px;border-radius:6px;font-size:12px;display:flex;gap:8px;align-items:flex-start;line-height:1.5;margin-top:14px;}
+  .alert.err{background:var(--error-bg);color:var(--error);border:1px solid #F0C9C9;}
+  .alert.ok{background:var(--success-bg);color:var(--success);border:1px solid #BFE6D6;}
+  .alert.warn{background:var(--warn-bg);color:var(--warn);border:1px solid #EFD9A8;}
+  .preview{margin-top:16px;border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none;}
+  .preview table td:nth-child(2){color:var(--success);}
+  .chip{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;background:#EAF2FB;color:var(--primary);margin-left:6px;}
+  .note{background:#FFF8E9;border:1px solid #EFD9A8;color:#7A5B12;padding:9px 12px;border-radius:6px;font-size:11px;margin-bottom:18px;line-height:1.6;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="logo"><span class="mark">W</span> WinTools</div>
+    <div class="search"><input id="search" placeholder="搜索工具（Ctrl+K）"></div>
+    <div class="winbtns"><span titled="设置">⚙</span><span>—</span><span>□</span><span>×</span></div>
+  </div>
+  <div class="main">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="content">
+      <div class="breadcrumb"><span id="crumbGroup">文件与磁盘</span><span>/</span><b id="crumbTool">哈希校验</b></div>
+      <div class="workspace" id="workspace"></div>
+      <div class="statusbar">
+        <span class="badge info" id="status"><span class="ico">●</span> 就绪</span>
+        <span style="margin-left:auto">WinTools 原型 · 仅演示界面与交互</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const tools = [
+  {group:"文件与磁盘", id:"hash", name:"哈希校验", render:renderHash},
+  {group:"文件与磁盘", id:"rename", name:"批量重命名", render:renderRename},
+  {group:"文本与编码", id:"json", name:"JSON 格式化", render:renderJson},
+  {group:"文本与编码", id:"base64", name:"Base64 编解码", render:renderBase64},
+  {group:"文本与编码", id:"password", name:"随机密码生成", render:renderPassword},
+  {group:"系统信息", id:"sysinfo", name:"系统信息总览", render:renderSysinfo},
+  {group:"系统信息", id:"port", name:"端口占用查询", render:renderPort},
+];
+let current = "hash";
+
+function buildNav(filter=""){
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML="";
+  const groups = [...new Set(tools.map(t=>t.group))];
+  groups.forEach(g=>{
+    const items = tools.filter(t=>t.group===g && (!filter || t.name.toLowerCase().includes(filter.toLowerCase()) || t.id.includes(filter.toLowerCase())));
+    if(!items.length) return;
+    const gEl=document.createElement("div"); gEl.className="nav-group";
+    gEl.innerHTML=`<div class="nav-group-title">${g}</div>`;
+    items.forEach(t=>{
+      const it=document.createElement("div");
+      it.className="nav-item"+(t.id===current?" active":"");
+      it.innerHTML=`<span class="dot"></span>${t.name}`;
+      it.onclick=()=>{current=t.id;buildNav(document.getElementById("search").value);openTool(t);};
+      gEl.appendChild(it);
+    });
+    sb.appendChild(gEl);
+  });
+}
+function openTool(t){
+  document.getElementById("crumbGroup").textContent=t.group;
+  document.getElementById("crumbTool").textContent=t.name;
+  setStatus("info","●","就绪");
+  document.getElementById("workspace").innerHTML="";
+  t.render();
+}
+function setStatus(type,ico,text){
+  const el=document.getElementById("status");
+  el.className="badge "+type; el.innerHTML=`<span class="ico">${ico}</span> ${text}`;
+}
+function header(title,desc){
+  document.getElementById("workspace").innerHTML=
+    `<div class="tool-title">${title}</div><div class="tool-desc">${desc}</div><div id="toolbody"></div>`;
+  return document.getElementById("toolbody");
+}
+function copyResult(){setStatus("ok","✓","已复制到剪贴板");}
+
+function renderHash(){
+  const b=header("哈希校验","拖入一个或多个文件，立即计算 MD5 / SHA1 / SHA256。对应验收用例 F1-AC1 ~ F1-AC5。");
+  b.innerHTML=`
+    <div class="dropzone" onclick="fakeHash()">
+      <div class="icon">⇪</div>
+      <div class="hint"><b>拖入文件</b>，或点击浏览选择</div>
+      <div class="hint" style="font-size:11px">支持多选 · 大文件显示进度且不卡界面</div>
+    </div>
+    <div class="progress" id="hashProg"><i></i></div>
+    <div class="result-box hidden" id="hashResult">
+      <div class="result-head">校验结果 <button class="btn copy" onclick="copyResult()">复制</button></div>
+      <div class="result-body">
+        <div><span class="k">文件</span>setup_installer.exe</div>
+        <div><span class="k">MD5</span>9b2e5d1f7a3c840e6f1b9d2a4c7e5038</div>
+        <div><span class="k">SHA1</span>3f8a1c9d2e7b4f6a0c5d8e3b1a7f2c9d4e6b8a10</div>
+        <div><span class="k">SHA256</span>a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90</div>
+      </div>
+    </div>`;
+}
+function fakeHash(){
+  const p=document.getElementById("hashProg"); p.style.display="block";
+  setStatus("info","◌","正在计算 1 个文件…");
+  let w=0; const iv=setInterval(()=>{w+=20;p.firstElementChild.style.width=w+"%";if(w>=100){clearInterval(iv);document.getElementById("hashResult").classList.remove("hidden");p.style.display="none";setStatus("ok","✓","校验完成，已计算 1 个文件");}},160);
+}
+
+function renderRename(){
+  const b=header("批量重命名","按规则批量改名。这是危险操作，必须先预览、再确认，且绝不静默覆盖原文件。对应 F2-AC1 ~ F2-AC5。");
+  b.innerHTML=`
+    <div class="note">⚠ 不可逆操作：执行前请核对预览，系统会自动避免文件名冲突，绝不覆盖已有文件。</div>
+    <div class="dropzone" style="height:96px"><div class="hint"><b>拖入要重命名的文件</b>（示例已载入 3 个）</div></div>
+    <div class="mt row">
+      <div><label class="field">命名规则</label><input class="input" value=" vacation_## "></div>
+      <div style="align-self:flex-end;padding-bottom:9px;color:var(--muted);font-size:11px">## 表示从 1 开始的序号</div>
+    </div>
+    <div class="mt row">
+      <button class="btn" onclick="showPreview()">预览</button>
+      <button class="btn danger" onclick="setStatus('warn','⚠','请先点击预览确认改名列表')">执行重命名</button>
+    </div>
+    <div class="preview" id="renamePreview">
+      <table><thead><tr><th>原名</th><th>新名</th></tr></thead><tbody>
+        <tr><td>IMG_20240501.jpg</td><td>vacation_1.jpg</td></tr>
+        <tr><td>IMG_20240502.jpg</td><td>vacation_2.jpg</td></tr>
+        <tr><td>IMG_20240503.jpg</td><td>vacation_3.jpg</td></tr>
+      </tbody></table>
+      <div style="padding:10px 14px"><button class="btn danger" onclick="setStatus('ok','✓','已重命名 3 个文件（可点击撤销）')">确认执行</button>
+      <button class="btn" onclick="setStatus('info','↶','已撤销上一步')" style="margin-left:8px">撤销</button></div>
+    </div>`;
+}
+function showPreview(){document.getElementById("renamePreview").style.display="block";setStatus("warn","⚠","请核对预览后再执行");}
+
+function renderJson(){
+  const b=header("JSON 格式化 / 校验","粘贴 JSON 一键美化；语法错误会指出行号与原因，中文不乱码。对应 T1-AC1 ~ T1-AC4。");
+  b.innerHTML=`
+    <label class="field">输入 JSON</label>
+    <textarea class="input" style="max-width:none;height:150px;padding:10px;resize:vertical" id="jsonIn">{ "name":"工具箱", "version":1.0, "tools":["哈希","JSON"] }</textarea>
+    <div class="mt"><button class="btn primary" onclick="formatJson()">格式化</button>
+    <button class="btn" onclick="document.getElementById('jsonIn').value='';setStatus('info','●','已清空')" style="margin-left:8px">清空</button></div>
+    <div id="jsonErr"></div>
+    <div class="result-box hidden" id="jsonOut"><div class="result-head">格式化结果 <button class="btn copy" onclick="copyResult()">复制</button></div><div class="result-body" id="jsonOutBody"></div></div>`;
+}
+function formatJson(){
+  const v=document.getElementById("jsonIn").value.trim();
+  document.getElementById("jsonErr").innerHTML="";
+  if(!v){document.getElementById("jsonErr").innerHTML='<div class="alert err"><span>✕</span><span>输入无效：内容为空。请先粘贴 JSON。</span></div>';setStatus("err","✕","输入为空");return;}
+  try{
+    const o=JSON.parse(v);
+    document.getElementById("jsonOutBody").textContent=JSON.stringify(o,null,2);
+    document.getElementById("jsonOut").classList.remove("hidden");
+    setStatus("ok","✓","格式化完成");
+  }catch(e){
+    document.getElementById("jsonErr").innerHTML=`<div class="alert err"><span>✕</span><span>语法错误：${e.message}。请检查括号与逗号后重试。</span></div>`;
+    setStatus("err","✕","JSON 语法错误");
+  }
+}
+
+function renderBase64(){
+  const b=header("Base64 编解码","文本与 Base64 双向转换，中文往返不乱码。对应 T2-AC1 ~ T2-AC4。");
+  b.innerHTML=`
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn primary" onclick="b64('encode')">→ 编码</button>
+      <button class="btn" onclick="b64('decode')">→ 解码</button>
+    </div>
+    <label class="field">输入</label>
+    <textarea class="input" style="max-width:none;height:90px;padding:10px;resize:vertical" id="b64In">WinTools 工具箱</textarea>
+    <div class="result-box"><div class="result-head">输出 <button class="btn copy" onclick="copyResult()">复制</button></div><div class="result-body" id="b64Out">（点击上方按钮开始）</div></div>`;
+}
+function b64(mode){
+  const v=document.getElementById("b64In").value;
+  try{
+    if(mode==="encode"){
+      const bytes=new TextEncoder().encode(v);let bin="";bytes.forEach(x=>bin+=String.fromCharCode(x));
+      document.getElementById("b64Out").textContent=btoa(bin);setStatus("ok","✓","编码完成");
+    }else{
+      const bin=atob(v.trim());const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+      document.getElementById("b64Out").textContent=new TextDecoder().decode(bytes);setStatus("ok","✓","解码完成");
+    }
+  }catch(e){document.getElementById("b64Out").textContent="无法解码：输入不是合法的 Base64 字符串。";setStatus("err","✕","解码失败");}
+}
+
+function renderPassword(){
+  const b=header("随机密码生成","生成强密码，可定制长度与字符集，一键复制。对应 T4-AC1 ~ T4-AC4。");
+  b.innerHTML=`
+    <label class="field">长度</label>
+    <input class="input" type="number" id="pwLen" value="16" min="4" max="64">
+    <div class="mt"><label class="field">包含字符</label>
+      <label><input type="checkbox" id="pwLower" checked> 小写字母</label>　
+      <label><input type="checkbox" id="pwUpper" checked> 大写字母</label>　
+      <label><input type="checkbox" id="pwNum" checked> 数字</label>　
+      <label><input type="checkbox" id="pwSym" checked> 符号</label></div>
+    <div class="mt"><button class="btn primary" onclick="genPw()">生成密码</button></div>
+    <div class="result-box"><div class="result-head">生成的密码 <button class="btn copy" onclick="copyResult()">复制</button></div><div class="result-body" id="pwOut">（点击生成）</div></div>`;
+}
+function genPw(){
+  const len=Math.min(64,Math.max(4,parseInt(document.getElementById("pwLen").value)||16));
+  let cs="";
+  if(document.getElementById("pwLower").checked)cs+="abcdefghijkmnopqrstuvwxyz";
+  if(document.getElementById("pwUpper").checked)cs+="ABCDEFGHJKLMNPQRSTUVWXYZ";
+  if(document.getElementById("pwNum").checked)cs+="23456789";
+  if(document.getElementById("pwSym").checked)cs+="!@#$%^&*";
+  if(!cs){setStatus("err","✕","请至少选择一种字符集");return;}
+  let s="";for(let i=0;i<len;i++)s+=cs[Math.floor(Math.random()*cs.length)];
+  document.getElementById("pwOut").textContent=s;setStatus("ok","✓","已生成 "+len+" 位密码");
+}
+
+function renderSysinfo(){
+  const b=header("系统信息总览","一屏看清 CPU / 内存 / 系统版本 / 磁盘，普通权限即可读取，一键复制。对应 S1-AC1 ~ S1-AC4。");
+  b.innerHTML=`
+    <div class="result-box"><div class="result-head">本机概要 <button class="btn copy" onclick="copyResult()">复制全部</button></div>
+      <div class="result-body">
+        <div><span class="k">处理器</span>Intel(R) Core(TM) i7-12700H  @ 2.70GHz（12 核）</div>
+        <div><span class="k">内存</span>16.0 GB</div>
+        <div><span class="k">系统</span>Windows 11 专业版 64 位 (10.0.22631)</div>
+        <div><span class="k">系统盘</span>512 GB SSD · 已用 186 GB / 可用 326 GB</div>
+        <div><span class="k">权限</span>普通用户（无需管理员）</div>
+      </div></div>
+    <div class="alert ok"><span>✓</span><span>所有字段读取成功。若某项失败会显示"不可用"，不影响其他字段。</span></div>`;
+  setStatus("ok","✓","信息读取完成");
+}
+
+function renderPort(){
+  const b=header("端口占用查询","查询端口被哪个进程占用；空闲与非法输入都有明确提示。对应 S2-AC1 ~ S2-AC4。");
+  b.innerHTML=`
+    <label class="field">端口号（1-65535）</label>
+    <div class="row"><input class="input" id="portIn" placeholder="例如 8080" style="max-width:200px">
+      <button class="btn primary" onclick="queryPort()">查询</button></div>
+    <div id="portErr"></div>
+    <div class="result-box hidden" id="portRes"><div class="result-head">查询结果</div>
+      <table><thead><tr><th>端口</th><th>协议</th><th>进程名</th><th>PID</th></tr></thead>
+      <tbody id="portBody"></tbody></table></div>`;
+}
+function queryPort(){
+  const el=document.getElementById("portIn");const v=el.value.trim();
+  el.classList.remove("input-error");document.getElementById("portErr").innerHTML="";
+  if(!/^\d+$/.test(v)||+v<1||+v>65535){
+    el.classList.add("input-error");
+    document.getElementById("portErr").innerHTML='<div class="field-error">输入无效：端口号超出范围。请输入 1-65535 的数字。</div>';
+    setStatus("err","✕","端口输入无效");return;
+  }
+  const res=document.getElementById("portRes");res.classList.remove("hidden");
+  if(v==="8080"||v==="80"||v==="443"){
+    document.getElementById("portBody").innerHTML=`<tr><td class="mono">${v}</td><td>TCP</td><td>${v==="8080"?"java.exe":"System"}</td><td class="mono">${v==="8080"?"12456":"4"}</td></tr>`;
+    setStatus("ok","✓",`端口 ${v} 已被占用`);
+  }else{
+    document.getElementById("portBody").innerHTML=`<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px">端口 ${v} 未被占用</td></tr>`;
+    setStatus("info","●",`端口 ${v} 未被占用`);
+  }
+}
+
+document.getElementById("search").addEventListener("input",e=>buildNav(e.target.value.trim()));
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();document.getElementById("search").focus();}
+  if(e.key==="Escape")document.getElementById("search").blur();
+});
+buildNav();
+openTool(tools[0]);
+</script>
+</body>
+</html>
