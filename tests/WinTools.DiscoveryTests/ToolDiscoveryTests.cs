@@ -1,6 +1,7 @@
 using System.Windows.Forms;
 using WinTools.Core.Ui;
 using WinTools.Shell;
+using WinTools.Tools.SystemTools;
 using Xunit;
 
 namespace WinTools.DiscoveryTests;
@@ -318,29 +319,40 @@ public sealed class ToolDiscoveryTests
     }
 
     [Fact]
-    public void ImageCompress_CreateUI_HintRowIsContainerNotAutoSizeLabel()
+    public void ImageCompress_CreateUI_HintFollowsQualityRowAndCompressButtonAfterClear()
     {
-        // 回归：提示标签曾直接 Dock=Fill + AutoSize，卡片行数挤占 Fill 区塌陷后，
-        // 标签按自身首选高度向下溢出，压在"开始压缩"主按钮上（截图里文字与按钮混叠）。
-        // 修复后：提示行 Dock=Bottom 贴在操作行正上方，中间由 Fill 弹性空档吸收
-        // 不同 DPI 下的行高偏差——提示永远不可能与按钮重叠，按钮也永远不会被挤出卡片。
+        // 回归（用户截图反馈）："开始压缩"曾独占 Dock=Bottom 操作行，"尚未选择图片"也贴底，
+        // 二者沉在卡片底部、离"压缩质量"行很远。改后：开始压缩并入选择行、紧跟"清空"；
+        // 提示行 Dock=Top 紧贴质量行下方；两处行间距一致（选择行/质量行 Padding.Bottom 均 8px）。
         var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
         var tool = tools.First(t => t.Id == "image-compress");
         using var ui = tool.CreateUI();
 
+        var select = Descendants<Button>(ui).Single(b => b.Text == "选择图片");
+        var clear = Descendants<Button>(ui).Single(b => b.Text == "清空");
+        var compress = Descendants<Button>(ui).Single(b => b.Text == "开始压缩");
+        // 三个按钮同在选择行，顺序：选择图片 → 清空 → 开始压缩。
+        var selectBar = Assert.IsType<FlowLayoutPanel>(select.Parent);
+        Assert.Same(selectBar, clear.Parent);
+        Assert.Same(selectBar, compress.Parent);
+        Assert.True(selectBar.Controls.GetChildIndex(compress) > selectBar.Controls.GetChildIndex(clear),
+            "开始压缩应排在清空之后。");
+        Assert.Equal(DockStyle.Top, selectBar.Dock);
+
         var hint = Descendants<Label>(ui).Single(l => l.Text == "尚未选择图片");
         var hintRow = Assert.IsType<FlowLayoutPanel>(hint.Parent);
-        Assert.Equal(DockStyle.Bottom, hintRow.Dock);
+        Assert.Equal(DockStyle.Top, hintRow.Dock); // 贴顶：紧跟质量行，不再沉底
 
-        var btnBar = Descendants<FlowLayoutPanel>(ui)
-            .Single(p => p.Controls.Cast<Control>().Any(c => c.Text == "开始压缩"));
-        Assert.Equal(DockStyle.Bottom, btnBar.Dock);
-        // 提示行与按钮行同属一个卡片内容区（提示行紧邻按钮行上方，同为 Bottom 停靠）。
-        Assert.Same(btnBar.Parent, hintRow.Parent);
+        var qualityBar = Descendants<FlowLayoutPanel>(ui)
+            .Single(p => p.Controls.Cast<Control>().Any(c => c is Label && c.Text == "压缩质量"));
+        // 行间距一致：选择行↔质量行 == 质量行↔提示行。
+        Assert.Equal(selectBar.Padding.Bottom, qualityBar.Padding.Bottom);
+        Assert.True(qualityBar.Padding.Bottom > 0, "行间距不应为 0。");
+        Assert.Same(selectBar.Parent, qualityBar.Parent);
+        Assert.Same(qualityBar.Parent, hintRow.Parent);
 
-        var card = (CardPanel)btnBar.Parent!.Parent;
-        // 实算需 表头40 + 内边距28 + 选择行38 + 质量行40 + 提示行24 + 操作行46 ≈ 216。
-        Assert.True(card.Height >= UiTheme.Sx(216),
+        var card = Assert.IsType<CardPanel>(selectBar.Parent!.Parent);
+        Assert.True(card.Height >= UiTheme.Sx(172),
             $"图片列表卡片高度不足（{card.Height}px），行会被挤压。");
     }
 
@@ -437,6 +449,125 @@ public sealed class ToolDiscoveryTests
         // 默认选中 PNG，质量框应为禁用态，但底色保持 FieldBg（与卡片区分、框可见）。
         Assert.False(numeric.Enabled);
         Assert.Equal(UiTheme.FieldBg, numeric.BackColor);
+    }
+
+    [Fact]
+    public void DiscoverFromDirectory_FindsNewUtilityBatch()
+    {
+        // 新增四工具靠反射自动发现，宿主源码零改动。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+
+        Assert.Contains(tools, t => t.Id == "ping-test" && t.Name == "Ping 测试" && t.Category == "系统工具");
+        Assert.Contains(tools, t => t.Id == "duplicate-finder" && t.Name == "重复文件查找" && t.Category == "文件工具");
+        Assert.Contains(tools, t => t.Id == "text-stats" && t.Name == "文本统计" && t.Category == "文本工具");
+        Assert.Contains(tools, t => t.Id == "uuid-generator" && t.Name == "UUID 生成" && t.Category == "文本工具");
+    }
+
+    [Fact]
+    public void NewUtilityBatch_CreateUI_DoesNotThrow()
+    {
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+        foreach (var id in new[] { "ping-test", "duplicate-finder", "text-stats", "uuid-generator" })
+        {
+            var tool = tools.FirstOrDefault(t => t.Id == id);
+            Assert.NotNull(tool);
+            using var ui = tool!.CreateUI();
+            Assert.NotNull(ui);
+        }
+    }
+
+    [Fact]
+    public void Ping_CreateUI_CancelButtonExistsAndDisabledUntilTestStarts()
+    {
+        // 回归：本机 ping 几乎零延迟，没有间隔时整轮测试几十毫秒就结束，取消按钮启用即禁用，
+        // 用户根本来不及点，误以为"取消无作用"。UI 应保留取消按钮、初始禁用，且提示里说明间隔。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+        var tool = tools.First(t => t.Id == "ping-test");
+        using var ui = tool.CreateUI();
+
+        var startBtn = Descendants<Button>(ui).Single(b => b.Text == "开始测试");
+        var cancelBtn = Descendants<Button>(ui).Single(b => b.Text == "取消");
+        Assert.True(startBtn.Enabled, "初始应能开始测试。");
+        Assert.False(cancelBtn.Enabled, "未开始测试时取消按钮应禁用。");
+        Assert.Same(startBtn.Parent, cancelBtn.Parent);
+
+        // 次数/超时参数区的提示 Label 仍在（布局未因改动被挤掉）。
+        Assert.Contains(Descendants<Label>(ui), l => l.Text.Contains("超时"));
+        Assert.True(PingChecker.DefaultIntervalMs >= 200,
+            $"探测间隔过短，取消按钮仍会一闪而过：{PingChecker.DefaultIntervalMs}ms");
+    }
+
+    [Fact]
+    public void DuplicateFinder_CreateUI_HintBesideSelectButtonAndActionRowCentered()
+    {
+        // 回归：提示文字曾单独占一行；红框里的标签/数字框/按钮统一贴顶，视觉上不齐。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+        var tool = tools.First(t => t.Id == "duplicate-finder");
+        using var ui = tool.CreateUI();
+
+        var hint = Descendants<Label>(ui).Single(l => l.Text.Contains("只读扫描", StringComparison.Ordinal));
+        var selectBtn = Descendants<Control>(ui).Single(c => c.Text == "选择文件夹");
+        var selectRow = Assert.IsType<FlowLayoutPanel>(hint.Parent);
+        Assert.Same(selectRow, selectBtn.Parent);
+        Assert.Equal(new[] { "选择文件夹", hint.Text }, selectRow.Controls.Cast<Control>().Select(c => c.Text));
+        Assert.Equal((UiTheme.Sx(32) - hint.Height) / 2, hint.Margin.Top);
+
+        var scanBtn = Descendants<Control>(ui).Single(c => c.Text == "开始查找");
+        var actionRow = Assert.IsType<FlowLayoutPanel>(scanBtn.Parent);
+        Assert.Equal(UiTheme.Sx(42), actionRow.Height);
+        foreach (Control c in actionRow.Controls)
+            Assert.Equal((actionRow.Height - c.Height) / 2, c.Margin.Top);
+
+        var card = Descendants<CardPanel>(ui).Single(c => c.Title == "扫描范围");
+        Assert.True(card.Height <= UiTheme.Sx(196),
+            $"扫描范围卡片仍有空行残留（{card.Height}px）。");
+    }
+
+    [Fact]
+    public void Uuid_CreateUI_FormatButtonsFollowUppercaseAndRowCentered()
+    {
+        // 回归：格式按钮原在独立第二行，"大写"之后才接"带连字符/无连字符/花括号"；
+        // 且标签/复选框与数字框/按钮统一贴顶，整行看起来不居中。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+        var tool = tools.First(t => t.Id == "uuid-generator");
+        using var ui = tool.CreateUI();
+
+        var dashed = Descendants<Control>(ui).Single(c => c.Text == "带连字符");
+        var row = Assert.IsType<FlowLayoutPanel>(dashed.Parent);
+        var controls = row.Controls.Cast<Control>().ToArray();
+        Assert.Equal(6, controls.Length);
+        Assert.Equal("生成数量", controls[0].Text);
+        Assert.IsType<FluentNumeric>(controls[1]);
+        Assert.Equal("大写", controls[2].Text);
+        Assert.Equal(new[] { "带连字符", "无连字符", "花括号" },
+            controls.Skip(3).Select(c => c.Text));
+
+        // 与 Ping 参数行同一套规则：按 32px 内容高度补半差，而不是写死上边距。
+        foreach (var c in controls)
+            Assert.Equal((UiTheme.Sx(32) - c.Height) / 2, c.Margin.Top);
+
+        var card = Descendants<CardPanel>(ui).Single(c => c.Title == "生成参数");
+        Assert.True(card.Height <= UiTheme.Sx(176),
+            $"参数卡仍有空行残留（{card.Height}px）。");
+    }
+
+    [Fact]
+    public void Ping_CreateUI_SettingRowContentsVerticallyCentered()
+    {
+        // 回归：行内标签（AutoSize 约 18px）与数字框/按钮（32px）曾统一贴顶，
+        // "次数 / 超时（秒）"标签在 46px 高的行里明显偏高。
+        // 修复后各控件按实测高度补半差，行本身不再有 6px 上内边距。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+        var tool = tools.First(t => t.Id == "ping-test");
+        using var ui = tool.CreateUI();
+
+        var row = Descendants<FlowLayoutPanel>(ui)
+            .Single(p => p.Controls.Cast<Control>().Any(c => c.Text == "开始测试"));
+        Assert.Equal(UiTheme.Sx(46), row.Height);
+        Assert.Equal(0, row.Padding.Top);
+        Assert.Equal(6, row.Controls.Count);
+        foreach (Control c in row.Controls)
+            Assert.Equal((row.Height - c.Height) / 2, c.Margin.Top);
     }
 
     private static IEnumerable<T> Descendants<T>(Control parent) where T : Control

@@ -4,7 +4,7 @@
 ; 版本与 src/WinTools.Shell/WinTools.Shell.csproj 的 <Version> 保持一致
 
 #define MyAppName "WinTools 轻量级工具箱"
-#define MyAppVersion "0.5.7"
+#define MyAppVersion "0.6.5"
 #define MyAppPublisher "WinTools"
 #define MyAppExeName "WinTools.Shell.exe"
 

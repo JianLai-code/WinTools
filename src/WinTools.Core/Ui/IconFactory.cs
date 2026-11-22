@@ -283,6 +283,39 @@ public static class IconFactory
             FillRR(g, c, r, 16.2f, 12.4f, 2.6f, 5.6f, 0.5f);
         },
 
+        ["ping"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            FillCircle(g, c, r, 5.5f, 18.5f, 1.7f);
+            Arc(g, p, r, 5.5f, 18.5f, 5.2f, 310, 90);
+            Arc(g, p, r, 5.5f, 18.5f, 9.4f, 305, 100);
+            Arrow(g, p, r, 10, 14, 20, 4, 3.2f);
+        },
+        ["duplicate"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            RR(g, p, r, 8f, 8f, 12f, 12f, 2f);
+            RR(g, p, r, 4f, 4f, 12f, 12f, 2f);
+            Line(g, p, r, 7.5f, 10f, 12.5f, 10f);
+            Line(g, p, r, 10f, 7.5f, 10f, 12.5f);
+        },
+        ["stats"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            Line(g, p, r, 4, 19.5f, 20, 19.5f);
+            Line(g, p, r, 4, 19.5f, 4, 4.5f);
+            RR(g, p, r, 7f, 12f, 3f, 7.5f, 0.8f);
+            RR(g, p, r, 12f, 8f, 3f, 11.5f, 0.8f);
+            RR(g, p, r, 17f, 14f, 3f, 5.5f, 0.8f);
+        },
+        ["uuid"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            RR(g, p, r, 3f, 8.5f, 18f, 7f, 3.5f);
+            Line(g, p, r, 8.5f, 8.5f, 8.5f, 15.5f);
+            Line(g, p, r, 12f, 8.5f, 12f, 15.5f);
+            Line(g, p, r, 15.5f, 8.5f, 15.5f, 15.5f);
+        },
         ["sparkle"] = (g, r, w, c) =>
 
         {

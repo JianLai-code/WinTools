@@ -40,6 +40,10 @@ public static class ToolMeta
         ["image-format-converter"] = new("image-format", "PNG / JPG / BMP / GIF / TIFF 互转，另存不覆盖", "", "媒体办公", 5, false),
         ["image-compress"]     = new("image-compress", "批量压缩图片为 JPG，可调质量，变大保留原图", "", "媒体办公", 6, false),
         ["folder-size-analyzer"] = new("folder-size", "按大小排序看哪个子目录最占空间，只读", "", "文件处理", 3, false),
+        ["ping-test"]          = new("ping", "测试主机连通性与延迟，丢包率一目了然", "", "网络工具", 4, false),
+        ["duplicate-finder"]   = new("duplicate", "按大小与 SHA-256 找重复文件，只报告不删除", "", "文件处理", 1, false),
+        ["text-stats"]         = new("stats", "字符 / 行 / 词 / UTF-8 字节即时统计", "", "文本编码", 1, false),
+        ["uuid-generator"]     = new("uuid", "随机 UUID v4，三种格式可一次生成多个", "", "开发辅助", 5, false),
         ["hello"]              = new("sparkle", "插件发现机制的示例工具", "", "开发辅助", 7, false)
     };
 

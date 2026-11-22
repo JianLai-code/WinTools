@@ -35,6 +35,7 @@ public sealed class ImageCompressTool : ITool
         };
         selectBar.Controls.Add(btnSelect);
         selectBar.Controls.Add(btnClear);
+        selectBar.Controls.Add(btnCompress); // 开始压缩并入选择行，紧跟在"清空"之后
         var qualityBar = new FlowLayoutPanel
         {
             Dock = DockStyle.Top, AutoSize = true, WrapContents = false, Margin = Padding.Empty,
@@ -50,34 +51,25 @@ public sealed class ImageCompressTool : ITool
             c.Margin = new Padding(0, Math.Max(0, (UiTheme.Sx(32) - c.Height) / 2), UiTheme.Sx(10), 0);
         foreach (Control c in selectBar.Controls) c.Margin = UiTheme.Pad(0, 0, 8, 0);
 
-        var actionBar = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Bottom, Height = UiTheme.Sx(46), WrapContents = false, Margin = Padding.Empty
-        };
-        actionBar.Padding = UiTheme.Pad(0, 8, 0, 0);
-        actionBar.Controls.Add(btnCompress);
-        foreach (Control c in actionBar.Controls) c.Margin = UiTheme.Pad(0, 0, 8, 0);
-
-        var selectCard = new CardPanel("图片列表") { Dock = DockStyle.Top, Height = UiTheme.Sx(228) };
-        // 后加的先贴边（先处理）：actionBar(Bottom) 最先入栈保证按钮永不消失；selectBar/qualityBar
-        // 依次贴顶；hintRow(Bottom) 贴在 actionBar 正上方——提示与按钮相邻，中间的 Fill 弹性空档
-        // 吸收各行在不同 DPI 下的高度偏差。绝不能让 AutoSize 标签直接 Dock=Fill：行数挤占后
-        // Fill 区塌陷，标签会按首选高度向下溢出压到按钮上（0.5.4 前的旧坑）。
-        // 卡高实算：表头 40 + 内边距 28 + 选择行 40 + 质量行 40 + 提示行 24 + 操作行 46 ≈ 218，
-        // 富余约 8px 恰好等于行间距，各行间距统一为 8。
+        var selectCard = new CardPanel("图片列表") { Dock = DockStyle.Top, Height = UiTheme.Sx(182) };
+        // 后加的先贴边（先处理）：selectBar / qualityBar / hintRow 依次贴顶，顺序自上而下为
+        // 选择行 → 质量行 → 提示行；fillSpacer(Fill) 最后加入 → 最先处理贴底，吸收下方空白。
+        // 用户要求：提示行紧跟质量行，其间距与"选择行↔质量行"一致——两行都设 Padding.Bottom=8，
+        // 故 qualityBar 底边距与 selectBar 底边距同为 8px。绝不能让 AutoSize 标签直接 Dock=Fill：
+        // Fill 区塌陷时标签会按首选高度向下溢出（0.5.4 前的旧坑）。
+        // 卡高实算：表头 40 + 内边距 28 + 选择行 40 + 质量行 40 + 提示行 24 ≈ 172，富余约 10px。
         var selectedLabel = UiTheme.HintLabel("尚未选择图片");
         selectedLabel.Margin = UiTheme.Pad(0, 2, 0, 0);
         var hintRow = new FlowLayoutPanel
         {
-            Dock = DockStyle.Bottom, Height = UiTheme.Sx(24), WrapContents = false, Margin = Padding.Empty
+            Dock = DockStyle.Top, Height = UiTheme.Sx(24), WrapContents = false, Margin = Padding.Empty
         };
         hintRow.Controls.Add(selectedLabel);
         var fillSpacer = new Panel { Dock = DockStyle.Fill, Margin = Padding.Empty };
-        selectCard.Content.Controls.Add(fillSpacer);   // Fill 先加，占中间弹性区
-        selectCard.Content.Controls.Add(hintRow);      // Bottom：贴 actionBar 上方
+        selectCard.Content.Controls.Add(fillSpacer);   // Fill 先加：最先处理，占底部弹性区
+        selectCard.Content.Controls.Add(hintRow);      // Top：贴质量行下方
         selectCard.Content.Controls.Add(qualityBar);   // Top
         selectCard.Content.Controls.Add(selectBar);    // Top：最后加的 Top 贴最顶
-        selectCard.Content.Controls.Add(actionBar);    // Bottom：最后加入 → 最先贴底，保证可见
 
         // ---- 结果表格 ----
         var list = UiTheme.List();
