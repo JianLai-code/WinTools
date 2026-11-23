@@ -4,9 +4,14 @@
 ; 版本与 src/WinTools.Shell/WinTools.Shell.csproj 的 <Version> 保持一致
 
 #define MyAppName "WinTools 轻量级工具箱"
-#define MyAppVersion "0.6.5"
+#define MyAppVersion "0.8.1"
 #define MyAppPublisher "WinTools"
 #define MyAppExeName "WinTools.Shell.exe"
+; 发布目录可覆盖：宿主正在运行时 publish 下的 DLL 会被锁定，
+; 可用 ISCC /dPublishDir=..\publish-xxxx 从另一份发布目录打包。
+#ifndef PublishDir
+#define PublishDir "..\publish"
+#endif
 
 [Setup]
 ; AppId 一旦发布切勿修改：改了会被当成另一个软件，无法覆盖升级
@@ -42,7 +47,7 @@ Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: 
 ; 方案 A（PublishSingleFile=false）：publish 目录里是 exe + 所有运行时 DLL + 工具 DLL。
 ; 用一条通配递归包含全部文件与语言子目录（cs/de/es/zh-Hans 等），排除调试符号减小体积。
 ; 工具 DLL（WinTools.Tools.*.dll）也在其中，运行时由 ToolDiscovery 反射发现。
-Source: "..\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb"
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb"
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

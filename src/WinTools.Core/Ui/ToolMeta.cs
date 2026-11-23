@@ -39,6 +39,7 @@ public static class ToolMeta
         ["file-encoding-converter"] = new("encoding", "UTF-8 / GBK / GB18030 互转，另存不覆盖", "", "文件处理", 4, false),
         ["image-format-converter"] = new("image-format", "PNG / JPG / BMP / GIF / TIFF 互转，另存不覆盖", "", "媒体办公", 5, false),
         ["image-compress"]     = new("image-compress", "批量压缩图片为 JPG，可调质量，变大保留原图", "", "媒体办公", 6, false),
+        ["exam-photo"]         = new("id-card", "红/蓝/白底互换，一寸二寸规格与体积可选", "", "媒体办公", 7, false),
         ["folder-size-analyzer"] = new("folder-size", "按大小排序看哪个子目录最占空间，只读", "", "文件处理", 3, false),
         ["ping-test"]          = new("ping", "测试主机连通性与延迟，丢包率一目了然", "", "网络工具", 4, false),
         ["duplicate-finder"]   = new("duplicate", "按大小与 SHA-256 找重复文件，只报告不删除", "", "文件处理", 1, false),

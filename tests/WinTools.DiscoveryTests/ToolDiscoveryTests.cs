@@ -119,6 +119,20 @@ public sealed class ToolDiscoveryTests
     }
 
     [Fact]
+    public void DiscoverFromDirectory_FindsExamPhotoTool()
+    {
+        // 报名照片处理只在既有 DLL 里多一个 ITool 类，宿主源码零改动即可被反射发现。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+
+        var tool = tools.FirstOrDefault(t => t.Id == "exam-photo");
+        Assert.NotNull(tool);
+        Assert.Equal("报名照片处理", tool!.Name);
+        Assert.Equal("图片工具", tool.Category);
+        using var ui = tool.CreateUI();
+        Assert.NotNull(ui);
+    }
+
+    [Fact]
     public void MediaAndDiskTools_CreateUI_DoesNotThrow()
     {
         var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);

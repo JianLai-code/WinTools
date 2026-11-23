@@ -273,6 +273,16 @@ public static class IconFactory
             Line(g, p, r, 20.5f, 16.5f, 20.5f, 20.5f);
             Line(g, p, r, 18.8f, 18.5f, 22.2f, 18.5f);
         },
+        // 证件卡片 + 头像 + 文字条：报名照片语义。
+        ["id-card"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            RR(g, p, r, 2.5f, 4.5f, 19f, 15f, 2.4f);
+            Circle(g, p, r, 8.5f, 10.2f, 2.2f);
+            Poly(g, p, r, 5f, 17.2f, 8.5f, 13.8f, 12f, 17.2f);
+            Line(g, p, r, 14.5f, 9.5f, 18.5f, 9.5f);
+            Line(g, p, r, 14.5f, 13f, 18.5f, 13f);
+        },
         // 文件夹 + 三根高低不同的柱子：大小分析语义。
         ["folder-size"] = (g, r, w, c) =>
         {
