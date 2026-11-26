@@ -4,7 +4,7 @@
 ; 版本与 src/WinTools.Shell/WinTools.Shell.csproj 的 <Version> 保持一致
 
 #define MyAppName "WinTools 轻量级工具箱"
-#define MyAppVersion "0.8.1"
+#define MyAppVersion "0.17.1"
 #define MyAppPublisher "WinTools"
 #define MyAppExeName "WinTools.Shell.exe"
 ; 发布目录可覆盖：宿主正在运行时 publish 下的 DLL 会被锁定，

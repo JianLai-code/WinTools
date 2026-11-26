@@ -119,6 +119,20 @@ public sealed class ToolDiscoveryTests
     }
 
     [Fact]
+    public void DiscoverFromDirectory_FindsScreenshotTool()
+    {
+        // 屏幕截图只在既有 DLL 里多一个 ITool 类，宿主源码零改动即可被反射发现。
+        var tools = ToolDiscovery.DiscoverFromDirectory(AppContext.BaseDirectory);
+
+        var tool = tools.FirstOrDefault(t => t.Id == "screen-capture");
+        Assert.NotNull(tool);
+        Assert.Equal("屏幕截图", tool!.Name);
+        Assert.Equal("图片工具", tool.Category);
+        using var ui = tool.CreateUI();
+        Assert.NotNull(ui);
+    }
+
+    [Fact]
     public void DiscoverFromDirectory_FindsExamPhotoTool()
     {
         // 报名照片处理只在既有 DLL 里多一个 ITool 类，宿主源码零改动即可被反射发现。

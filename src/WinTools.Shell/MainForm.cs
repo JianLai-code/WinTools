@@ -14,7 +14,7 @@ namespace WinTools.Shell;
 /// 视图：Home / Category / Favorites / Recent / Search / Workbench / Settings。
 /// 工具仍由 ToolDiscovery 反射发现，本类只消费 ITool 与 ToolMeta，不感知具体工具。
 /// </summary>
-public sealed class MainForm : Form
+public sealed partial class MainForm : Form
 {
     private const int TitleBarH = 48;
     private const int NavExpanded = 228;
@@ -124,6 +124,9 @@ public sealed class MainForm : Form
     {
         base.OnLoad(e);
         ApplyWindowCorners();
+        SetupTray();
+        // 后台工具（全局热键等）必须在窗体首帧之前就绪：用户可能一启动就按快捷键。
+        StartBackgroundTools();
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -169,6 +172,7 @@ public sealed class MainForm : Form
 
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
+        DisposeTrayAndBackground();
         UiTheme.ThemeChanged -= OnThemeChanged;
         foreach (var form in _standaloneForms.ToArray()) form.Close();
         foreach (var ui in _uiCache.Values) ui.Dispose();
@@ -1265,13 +1269,14 @@ public sealed class MainForm : Form
         scroll.Canvas.Controls.Add(appearance);
         y += appearance.Height + UiTheme.Sx(12);
 
-        var keys = new CardPanel("键盘快捷键") { Size = UiTheme.Sz(800, 188), Location = new Point(pad, y) };
+        var keys = new CardPanel("键盘快捷键") { Size = UiTheme.Sz(800, 218), Location = new Point(pad, y) };
         keys.HeaderIcon = "bolt";
         keys.Content.Controls.Add(HintRows(
             ("Ctrl K", "聚焦搜索框，随时开始检索工具"),
             ("Ctrl 1 ~ 6", "直接打开快速入口卡片上标注对应的工具"),
-            ("Esc", "清空搜索并退出输入焦点"),
-            ("Ctrl Shift T", "窗口关闭后从托盘唤起主界面")));
+            ("Ctrl Shift A / F / S", "全局截图：区域 / 全屏 / 滚动（屏幕截图页可自定义，窗口关闭后仍生效）"),
+            ("Ctrl Shift T", "从托盘唤起主界面"),
+            ("Esc", "清空搜索并退出输入焦点")));
         scroll.Canvas.Controls.Add(keys);
         y += keys.Height + UiTheme.Sx(12);
 

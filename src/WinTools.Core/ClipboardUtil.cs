@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -16,6 +17,22 @@ public static class ClipboardUtil
         try
         {
             Clipboard.SetText(text);
+            return true;
+        }
+        catch (ExternalException) { return false; }
+        catch (ThreadStateException) { return false; }
+    }
+
+    /// <summary>
+    /// 剪贴板写入图片的同款兜底：远程桌面/剪贴板管理器占用剪贴链时 SetImage 会抛 ExternalException。
+    /// 图片对象调用方持有，本方法只写入引用不复制位图。
+    /// </summary>
+    public static bool TryCopyImage(Image image)
+    {
+        if (image is null) return false;
+        try
+        {
+            Clipboard.SetImage(image);
             return true;
         }
         catch (ExternalException) { return false; }

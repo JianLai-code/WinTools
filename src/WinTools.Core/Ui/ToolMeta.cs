@@ -45,6 +45,7 @@ public static class ToolMeta
         ["duplicate-finder"]   = new("duplicate", "按大小与 SHA-256 找重复文件，只报告不删除", "", "文件处理", 1, false),
         ["text-stats"]         = new("stats", "字符 / 行 / 词 / UTF-8 字节即时统计", "", "文本编码", 1, false),
         ["uuid-generator"]     = new("uuid", "随机 UUID v4，三种格式可一次生成多个", "", "开发辅助", 5, false),
+        ["screen-capture"]     = new("screenshot", "截图后可画框、箭头、文字、马赛克并置顶桌面", "", "媒体办公", 0, true),
         ["hello"]              = new("sparkle", "插件发现机制的示例工具", "", "开发辅助", 7, false)
     };
 

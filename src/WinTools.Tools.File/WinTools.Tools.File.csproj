@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WinTools.Core\WinTools.Core.csproj" />
+    <!-- 复用 Shell 同款 JSON 设置服务（损坏文件隔离 + 原子写入），热键配置存 screen-capture.json -->
+    <ProjectReference Include="..\WinTools.Services\WinTools.Services.csproj" />
   </ItemGroup>
 
   <!-- 项目名以 "WinTools.Tools." 开头，产物 DLL 会被 Directory.Build.props 自动复制到 Shell 目录 -->

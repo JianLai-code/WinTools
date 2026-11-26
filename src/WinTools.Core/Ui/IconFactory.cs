@@ -252,6 +252,23 @@ public static class IconFactory
             Arrow(g, p, r, 6, 13, 18, 13, 2.6f);
             Arrow(g, p, r, 18, 18, 6, 18, 2.6f);
         },
+        // 取景框四角 + 中央镜头圆：屏幕截图语义。
+        ["screenshot"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            Poly(g, p, r, 4f, 9f, 4f, 4f, 9f, 4f);
+            Poly(g, p, r, 15f, 4f, 20f, 4f, 20f, 9f);
+            Poly(g, p, r, 20f, 15f, 20f, 20f, 15f, 20f);
+            Poly(g, p, r, 9f, 20f, 4f, 20f, 4f, 15f);
+            Circle(g, p, r, 12f, 12f, 4.2f);
+        },
+        // 长页面 + 向下箭头：滚动截图语义（页面往下滚、逐段拼接）。
+        ["scroll"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            Poly(g, p, r, 5f, 3f, 19f, 3f, 19f, 21f, 5f, 21f, 5f, 3f);
+            Arrow(g, p, r, 12f, 7.5f, 12f, 17f, 4.2f);
+        },
         // 图片 + 右箭头：格式转换语义（源图换成另一种封装）。
         ["image-format"] = (g, r, w, c) =>
         {
@@ -634,6 +651,118 @@ public static class IconFactory
             RR(g, p, r, 3.2f, 6.5f, 17.6f, 13.5f, 2.6f);
             Line(g, p, r, 3.2f, 12, 20.8f, 12);
             RR(g, p, r, 10.2f, 10.2f, 3.6f, 3.6f, 1.2f);
+        },
+
+        // ── 截图标注工具栏专用（24x24 线稿，统一细描边） ─────────────
+        ["annot-rect"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            RR(g, p, r, 4, 5, 16, 14, 2);
+        },
+        ["annot-ellipse"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            Circle(g, p, r, 12, 12, 8);
+        },
+        ["annot-smile"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            Circle(g, p, r, 12, 12, 8);
+            FillCircle(g, c, r, 9.2f, 9.6f, 0.95f);
+            FillCircle(g, c, r, 14.8f, 9.6f, 0.95f);
+            Arc(g, p, r, 12, 12, 4.6f, 25, 130);
+        },
+        ["annot-arrow"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.9f, c);
+            Arrow(g, p, r, 5, 19, 19, 5, 4.2f);
+        },
+        ["annot-pen"] = (g, r, w, c) =>
+        {
+            // 一条流畅的自由曲线，比铅笔更易识别，也与箭头明显区分
+            using var p = Stroke(w * 0.95f, c);
+            var a = P(r, 3.5f, 18.5f);
+            var b = P(r, 6, 9);
+            var c1 = P(r, 12, 21);
+            var d = P(r, 20.5f, 5.5f);
+            g.DrawBezier(p, a, b, c1, d);
+        },
+        ["annot-mosaic"] = (g, r, w, c) =>
+        {
+            // 微信风格：四个实心小方块，选中时随图标色变白
+            FillRR(g, c, r, 4, 4, 7, 7, 1.2f);
+            FillRR(g, c, r, 13, 4, 7, 7, 1.2f);
+            FillRR(g, c, r, 4, 13, 7, 7, 1.2f);
+            FillRR(g, c, r, 13, 13, 7, 7, 1.2f);
+        },
+        ["annot-text"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 1.05f, c);
+            Line(g, p, r, 5, 5.5f, 19, 5.5f);
+            Line(g, p, r, 12, 5.5f, 12, 19);
+        },
+        ["annot-undo"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            Line(g, p, r, 12, 5, 6, 5);
+            Arc(g, p, r, 12, 12, 7, -90, 180);
+            Poly(g, p, r, 15.3f, 16.3f, 12, 19, 15.3f, 20.7f);
+        },
+        ["annot-redo"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            Line(g, p, r, 12, 5, 18, 5);
+            Arc(g, p, r, 12, 12, 7, -90, -180);
+            Poly(g, p, r, 8.7f, 16.3f, 12, 19, 8.7f, 20.7f);
+        },
+        ["annot-copy"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            RR(g, p, r, 9, 4.5f, 10.5f, 12, 1.8f);
+            RR(g, p, r, 4.5f, 8, 10.5f, 12, 1.8f);
+        },
+        ["annot-save"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.82f, c);
+            RR(g, p, r, 4, 4, 16, 16, 2);
+            RR(g, p, r, 7, 4.6f, 10, 6, 1);
+            Poly(g, p, r, 7, 20, 7, 15, 17, 15, 17, 20);
+        },
+        ["annot-pin"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.86f, c);
+            FillCircle(g, c, r, 12, 7.2f, 2.6f);
+            Line(g, p, r, 8, 10.5f, 16, 10.5f);
+            Line(g, p, r, 12, 10.5f, 12, 20);
+        },
+        ["annot-close"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 0.92f, c);
+            Line(g, p, r, 6.5f, 6.5f, 17.5f, 17.5f);
+            Line(g, p, r, 17.5f, 6.5f, 6.5f, 17.5f);
+        },
+        ["annot-done"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w * 1.05f, c);
+            Poly(g, p, r, 5, 12.5f, 10, 17.5f, 19, 7);
+        },
+        ["annot-crop"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            Poly(g, p, r, 6.2f, 2.8f, 6.2f, 17.8f, 21.2f, 17.8f);
+            Poly(g, p, r, 2.8f, 6.2f, 17.8f, 6.2f, 17.8f, 21.2f);
+        },
+        ["annot-forward"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            Line(g, p, r, 3.5f, 12, 15.5f, 12);
+            Arrow(g, p, r, 11, 6.5f, 18, 12, 3.4f);
+            Arrow(g, p, r, 18, 12, 11, 17.5f, 3.4f);
+        },
+        ["annot-select"] = (g, r, w, c) =>
+        {
+            using var p = Stroke(w, c);
+            Poly(g, p, r, 5, 3.2f, 5, 18.6f, 9.4f, 14.4f, 12.2f, 20.6f, 15.2f, 19.2f, 12.4f, 13.2f, 18.6f, 13.2f, 5, 3.2f);
         },
     };
 
